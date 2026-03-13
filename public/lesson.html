@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson - LangZy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container" style="max-width: 900px;">
+        <div class="flex-between mb-2" style="align-items: center; padding: 20px 0;">
+            <div class="flex gap-2" style="align-items: center;">
+                <button class="btn btn-secondary" onclick="window.history.back()" title="Exit Lesson">
+                    ← Exit
+                </button>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="assets/logo.png" alt="LangZy Logo"
+                        style="width: 42px; height: 42px; object-fit: contain; border-radius: 50%; border: 2px solid var(--emerald-light);">
+                    <h2
+                        style="margin: 0; background: linear-gradient(135deg, #34D399, #10B981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 22px; font-weight: 800; letter-spacing: -1px;">
+                        LangZy</h2>
+                </div>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <span class="header-profile-name"
+                    style="color: var(--text-main); font-weight: 600; margin-right: 8px; display: none;">User</span>
+                <label class="theme-switch" title="Toggle Light/Dark Mode" style="margin-right: 12px;">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="theme-slider"></span>
+                </label>
+                <button class="btn btn-secondary" onclick="window.location.href='home.html'">
+                    🏠 Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 40px; max-width: 900px;">
+        <div class="flex-between mb-3">
+            <div>
+            </div>
+            <div class="flex gap-2">
+                <div class="card" style="padding: 12px 20px; font-size: 24px;">
+                    <span id="heartsDisplay">❤️❤️❤️❤️❤️</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-3" id="progressContainer">
+            <div class="flex-between mb-1">
+                <span class="text-muted">Progress</span>
+                <span class="text-muted"><span id="currentQuestion">0</span> / <span id="totalQuestions">0</span></span>
+            </div>
+            <div class="xp-bar">
+                <div id="progressBar" class="xp-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Lesson Title -->
+        <div class="card mb-3 text-center" id="titleContainer">
+            <h1 id="lessonTitle" style="font-size: 32px; margin-bottom: 8px;">Loading...</h1>
+            <p class="text-muted" id="lessonDescription">Please wait...</p>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quizContainer" class="card" style="min-height: 400px;">
+            <!-- Quiz content will be loaded here -->
+        </div>
+
+        <!-- Answer Feedback -->
+        <div id="feedbackContainer" class="hidden"></div>
+
+        <!-- Action Buttons -->
+        <div class="flex-between mt-3">
+            <button id="skipBtn" class="btn btn-secondary" onclick="skipQuestion()" style="display: none;">
+                Skip
+            </button>
+            <button id="checkBtn" class="btn btn-primary" onclick="checkAnswer()" disabled style="margin-left: auto;">
+                Check Answer
+            </button>
+            <button id="continueBtn" class="btn btn-success" onclick="nextQuestion()"
+                style="display: none; margin-left: auto;">
+                Continue
+            </button>
+        </div>
+
+        <!-- Completion Screen -->
+        <div id="completionScreen" class="hidden">
+            <div class="card text-center" style="padding: 48px;">
+                <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+                <h1 style="font-size: 48px; margin-bottom: 16px;">Lesson Complete!</h1>
+                <div class="grid-3 mb-3" style="margin-top: 32px;">
+                    <div>
+                        <h3 style="color: var(--green); font-size: 36px;" id="xpEarned">0</h3>
+                        <p class="text-muted">XP Earned</p>
+                    </div>
+                    <div>
+                        <h3 style="color: var(--purple); font-size: 36px;" id="accuracy">0%</h3>
+                        <p class="text-muted">Accuracy</p>
+                    </div>
+                    <div>
+                        <h3 style="color: var(--orange); font-size: 36px;" id="heartsLeft">5</h3>
+                        <p class="text-muted">Hearts Left</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="returnToCourses()">
+                    Exit & Finish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="js/lesson.js"></script>
+</body>
+
+</html>

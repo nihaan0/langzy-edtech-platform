@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Language - LangZy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Top Nav -->
+        <div class="flex-between mb-3 fadeInUp" style="align-items: center; padding-top: 20px;">
+            <div class="flex gap-2" style="align-items: center;">
+                <button class="btn btn-secondary" onclick="window.history.back()" style="padding: 10px 16px;">⬅️
+                    Back</button>
+                <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;"
+                    onclick="window.location.href='home.html'">
+                    <img src="assets/logo.png" alt="LangZy Logo"
+                        style="width: 42px; height: 42px; object-fit: contain; border-radius: 50%;">
+                    <h2
+                        style="margin: 0; background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 24px;">
+                        LangZy</h2>
+                </div>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <span class="header-profile-name"
+                    style="color: var(--text-main); font-weight: 600; margin-right: 8px; display: none;">User</span>
+                <label class="theme-switch" title="Toggle Light/Dark Mode" style="margin-right: 12px;">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="theme-slider"></span>
+                </label>
+                <button class="btn btn-danger" onclick="clearAuth(); window.location.href='index.html'">🚪
+                    Logout</button>
+            </div>
+        </div>
+
+        <!-- Language Cycling Marquee -->
+        <div id="langMarqueeMount"></div>
+
+        <div class="fadeInUp">
+            <h1 style="font-size: 36px; margin-bottom: 8px;">🌍 Language Dashboard</h1>
+            <p class="text-muted mb-3">Choose a language to start your learning journey!</p>
+
+            <!-- Filters & Search Section -->
+            <div class="card mb-3"
+                style="background: var(--bg-secondary); border: 1px solid var(--purple); padding: 24px; border-radius: 20px;">
+                <div class="flex-between gap-2" style="flex-wrap: wrap;">
+                    <!-- Region Buttons -->
+                    <div class="flex gap-2" style="flex-wrap: wrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="filterByRegion('all')"
+                            id="btn-all">All</button>
+                        <button class="btn btn-secondary btn-sm" onclick="filterByRegion('European')"
+                            id="btn-European">European</button>
+                        <button class="btn btn-secondary btn-sm" onclick="filterByRegion('Asian')"
+                            id="btn-Asian">Asian</button>
+                        <button class="btn btn-secondary btn-sm" onclick="filterByRegion('Other')"
+                            id="btn-Other">Other</button>
+                    </div>
+                    <!-- Search Input -->
+                    <div style="position: relative; flex-grow: 1; max-width: 450px; width: 100%;">
+                        <span
+                            style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 20px;">🔍</span>
+                        <input type="text" id="searchLanguages" placeholder="Search from 20+ languages..."
+                            oninput="filterLanguages()"
+                            style="padding-left: 52px; margin-bottom: 0; background: var(--bg-primary); border-radius: 50px; height: 50px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Language Grid -->
+            <div id="languageGrid" class="grid-4 mb-4"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="js/marquee.js"></script>
+    <script>
+        requireAuth();
+        let currentRegion = 'all';
+
+        const languagesByRegion = {
+            European: ['Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Dutch', 'Swedish', 'Norwegian', 'Danish', 'Polish', 'Russian', 'Greek', 'Turkish'],
+            Asian: ['Tamil', 'Hindi', 'Japanese', 'Chinese', 'Korean', 'Thai', 'Vietnamese', 'Indonesian', 'Arabic'],
+            Other: ['English']
+        };
+
+        function renderLanguages() {
+            const grid = document.getElementById('languageGrid');
+            const searchInput = document.getElementById('searchLanguages');
+            const search = searchInput ? searchInput.value.toLowerCase() : '';
+            grid.innerHTML = '';
+
+            // Update button states
+            document.querySelectorAll('.btn-sm').forEach(btn => {
+                btn.className = 'btn btn-secondary btn-sm';
+                btn.style.background = 'var(--bg-secondary)';
+                btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            });
+            const activeBtn = document.getElementById(`btn-${currentRegion}`);
+            if (activeBtn) {
+                activeBtn.style.borderColor = 'var(--purple)';
+                activeBtn.style.background = 'rgba(124, 58, 237, 0.1)';
+            }
+
+            Object.entries(LANGUAGES).forEach(([lang, info]) => {
+                // Filter by region
+                if (currentRegion !== 'all') {
+                    const region = Object.entries(languagesByRegion).find(([r, langs]) => langs.includes(lang));
+                    if (!region || region[0] !== currentRegion) return;
+                }
+
+                // Filter by search
+                if (search && !lang.toLowerCase().includes(search) && !info.native.toLowerCase().includes(search)) {
+                    return;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.cursor = 'pointer';
+                card.style.padding = '24px';
+                card.style.transition = 'all 0.3s ease';
+                card.innerHTML = `
+                    <div class="text-center">
+                        <div style="font-size: 48px; margin-bottom: 12px;">${info.flag}</div>
+                        <h3 style="margin-bottom: 4px;">${lang}</h3>
+                        <p class="text-muted" style="font-size: 14px;">${info.native}</p>
+                    </div>
+                `;
+                card.onclick = () => selectLanguage(lang);
+                grid.appendChild(card);
+            });
+
+            if (grid.innerHTML === '') {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+                        <p style="font-size: 20px; color: var(--text-muted);">No languages found matching "${search}"</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function selectLanguage(language) {
+            showLoading();
+            try {
+                await apiCall('/auth/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify({ currentLanguage: language })
+                });
+
+                const user = getUser();
+                user.currentLanguage = language;
+                saveUser(user);
+
+                showToast(`${language} selected! 🎉`, 'success');
+                setTimeout(() => window.location.href = 'dashboard.html', 800);
+            } catch (error) {
+                console.error('Selection error:', error);
+                hideLoading();
+                showToast(`Failed to select language: ${error.message}`, 'error');
+            }
+        }
+
+        function filterLanguages() { renderLanguages(); }
+        function filterByRegion(region) {
+            currentRegion = region;
+            renderLanguages();
+        }
+
+        // Initialize
+        renderLanguages();
+    </script>
+</body>
+
+</html>

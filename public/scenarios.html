@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scenarios - LangZy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="flex-between mb-2" style="align-items: center; padding: 20px 0;">
+            <div class="flex gap-2" style="align-items: center;">
+                <button class="btn btn-secondary" onclick="window.history.back()" title="Go Back">
+                    ← Back
+                </button>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="assets/logo.png" alt="LangZy Logo" style="width: 40px; height: 40px;">
+                    <h2
+                        style="margin: 0; background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: -1px;">
+                        LangZy</h2>
+                </div>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <label class="theme-switch" title="Toggle Light/Dark Mode" style="margin-right: 12px;">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="theme-slider"></span>
+                </label>
+                <button class="btn btn-secondary" onclick="window.location.href='home.html'">
+                    🏠 Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Cycling Marquee -->
+    <div id="langMarqueeMount"></div>
+
+    <div class="container" style="padding-top: 40px;">
+        <div class="flex-between mb-3">
+            <div>
+                <h1 style="font-size: 36px; margin-top: 16px;">🎭 Conversation Scenarios</h1>
+                <p class="text-muted" id="languageName">Practice real-life conversations</p>
+            </div>
+        </div>
+
+        <!-- Scenarios Grid -->
+        <div class="grid-3" id="scenariosGrid">
+            <!-- Loading scenarios -->
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="js/marquee.js"></script>
+    <script src="js/scenarios.js"></script>
+</body>
+
+</html>

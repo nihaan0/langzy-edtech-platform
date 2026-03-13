@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games - LangZy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="flex-between mb-2" style="align-items: center; padding: 20px 0;">
+            <div class="flex gap-2" style="align-items: center;">
+                <button class="btn btn-secondary" onclick="window.history.back()" title="Go Back">
+                    ← Back
+                </button>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="assets/logo.png" alt="LangZy Logo"
+                        style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--emerald-light);">
+                    <h2
+                        style="margin: 0; background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: -1px;">
+                        LangZy</h2>
+                </div>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <label class="theme-switch" title="Toggle Light/Dark Mode" style="margin-right: 12px;">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="theme-slider"></span>
+                </label>
+                <button class="btn btn-secondary" onclick="window.location.href='home.html'">
+                    🏠 Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Cycling Marquee -->
+    <div id="langMarqueeMount"></div>
+
+    <div class="container" style="padding-top: 20px;">
+        <!-- Header -->
+        <div class="flex-between mb-3">
+            <div>
+                <h1 style="font-size: 36px; margin-bottom: 8px;">🎮 Language Games</h1>
+                <p class="text-muted" id="languageName">Learn through fun and games</p>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <select id="languageSelector" onchange="changeLanguage(this.value)">
+                    <!-- Languages populated by JS -->
+                </select>
+                <div class="card" style="padding: 16px 24px;">
+                    <h3 style="color: var(--yellow); margin-bottom: 4px;" id="highScore">0</h3>
+                    <p class="text-muted" style="font-size: 14px;">High Score</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Selection -->
+        <div id="gameSelection">
+            <h2 class="mb-2">Choose a Game</h2>
+            <div class="grid-3 mb-3">
+                <div class="card" onclick="startGame('word-match')" style="cursor: pointer;">
+                    <div style="font-size: 64px; text-align: center; margin-bottom: 12px;">🎯</div>
+                    <h3>Word Match</h3>
+                    <p class="text-muted">Match words with translations</p>
+                    <p style="color: var(--purple); font-weight: 600;">⚡ Quick & Fun</p>
+                </div>
+                <div class="card" onclick="startGame('word-scramble')" style="cursor: pointer;">
+                    <div style="font-size: 64px; text-align: center; margin-bottom: 12px;">🔤</div>
+                    <h3>Word Scramble</h3>
+                    <p class="text-muted">Unscramble letters</p>
+                    <p style="color: var(--blue); font-weight: 600;">🧩 Brain Teaser</p>
+                </div>
+                <div class="card" onclick="startGame('speed-cards')" style="cursor: pointer;">
+                    <div style="font-size: 64px; text-align: center; margin-bottom: 12px;">⚡</div>
+                    <h3>Speed Cards</h3>
+                    <p class="text-muted">Fast flashcard challenge</p>
+                    <p style="color: var(--yellow); font-weight: 600;">⏱️ Timed</p>
+                </div>
+                <div class="card" onclick="startGame('memory-game')" style="cursor: pointer;">
+                    <div style="font-size: 64px; text-align: center; margin-bottom: 12px;">🧠</div>
+                    <h3>Memory Game</h3>
+                    <p class="text-muted">Match pairs</p>
+                    <p style="color: var(--green); font-weight: 600;">🎴 Classic</p>
+                </div>
+                <div class="card" onclick="startGame('typing-challenge')" style="cursor: pointer;">
+                    <div style="font-size: 64px; text-align: center; margin-bottom: 12px;">⌨️</div>
+                    <h3>Typing Challenge</h3>
+                    <p class="text-muted">Type translations fast</p>
+                    <p style="color: var(--red); font-weight: 600;">🔥 Intense</p>
+                </div>
+                <div class="card" style="opacity: 0.5;">
+                    <div style="font-size: 64px; text-align: center; margin-bottom: 12px;">🎲</div>
+                    <h3>More Coming Soon!</h3>
+                    <p class="text-muted">Stay tuned</p>
+                </div>
+            </div>
+
+            <!-- Leaderboards -->
+            <div class="card">
+                <h2 class="mb-2">🏆 Leaderboards</h2>
+                <div id="leaderboardTabs" class="flex gap-2 mb-2">
+                    <button class="btn btn-primary" onclick="loadLeaderboard('word-match')">Word Match</button>
+                    <button class="btn btn-secondary" onclick="loadLeaderboard('word-scramble')">Scramble</button>
+                    <button class="btn btn-secondary" onclick="loadLeaderboard('speed-cards')">Speed Cards</button>
+                    <button class="btn btn-secondary" onclick="loadLeaderboard('memory-game')">Memory</button>
+                    <button class="btn btn-secondary" onclick="loadLeaderboard('typing-challenge')">Typing</button>
+                </div>
+                <div id="leaderboardContent">
+                    <p class="text-muted text-center" style="padding: 24px;">Select a game to view leaderboard</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Play Area -->
+        <div id="gamePlayArea" class="hidden">
+            <!-- Game Header -->
+            <div class="card mb-2" style="padding: 16px;">
+                <div class="flex-between">
+                    <h2 id="gameTitle">Game</h2>
+                    <div class="flex gap-2">
+                        <div style="background: var(--bg-secondary); padding: 8px 16px; border-radius: 8px;">
+                            ⏱️ <span id="timer">0:00</span>
+                        </div>
+                        <div style="background: var(--bg-secondary); padding: 8px 16px; border-radius: 8px;">
+                            🎯 <span id="score">0</span>
+                        </div>
+                        <button class="btn btn-danger" onclick="exitGame()">Exit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Content -->
+            <div class="card" style="min-height: 500px; padding: 32px;" id="gameContent">
+                <!-- Game content will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="card hidden text-center" style="padding: 48px;">
+            <div style="font-size: 80px; margin-bottom: 16px;">🏆</div>
+            <h1 style="margin-bottom: 16px;">Game Complete!</h1>
+            <div class="grid-3 mb-3">
+                <div class="card" style="background: var(--bg-secondary);">
+                    <h3 id="finalScore">0</h3>
+                    <p class="text-muted">Score</p>
+                </div>
+                <div class="card" style="background: var(--bg-secondary);">
+                    <h3 id="finalTime">0:00</h3>
+                    <p class="text-muted">Time</p>
+                </div>
+                <div class="card" style="background: var(--bg-secondary);">
+                    <h3 id="xpEarned">+0 XP</h3>
+                    <p class="text-muted">XP Earned</p>
+                </div>
+            </div>
+            <div class="flex gap-2" style="justify-content: center;">
+                <button class="btn btn-primary" onclick="playAgain()">Play Again</button>
+                <button class="btn btn-secondary" onclick="backToGames()">Choose Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="js/marquee.js"></script>
+    <script src="js/games.js"></script>
+</body>
+
+</html>

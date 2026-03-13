@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards - LangZy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="flex-between mb-2" style="align-items: center; padding: 20px 0;">
+            <div class="flex gap-2" style="align-items: center;">
+                <button class="btn btn-secondary" onclick="window.history.back()" title="Go Back">
+                    ← Back
+                </button>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="assets/logo.png" alt="LangZy Logo"
+                        style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--emerald-light);">
+                    <h2
+                        style="margin: 0; background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: -1px;">
+                        LangZy</h2>
+                </div>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <label class="theme-switch" title="Toggle Light/Dark Mode" style="margin-right: 12px;">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="theme-slider"></span>
+                </label>
+                <button class="btn btn-secondary" onclick="window.location.href='home.html'">
+                    🏠 Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Cycling Marquee -->
+    <div id="langMarqueeMount"></div>
+
+    <div class="container" style="padding-top: 20px;">
+        <!-- Header -->
+        <div class="flex-between mb-3">
+            <div>
+                <h1 style="font-size: 36px; margin-bottom: 8px;">🃏 Flashcards</h1>
+                <p class="text-muted" id="languageName">Practice with flashcards</p>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <select id="languageSelector" onchange="changeLanguage(this.value)">
+                    <!-- Languages populated by JS -->
+                </select>
+                <div class="card" style="padding: 16px 24px;">
+                    <h3 style="color: var(--green); margin-bottom: 4px;" id="cardsReviewed">0</h3>
+                    <p class="text-muted" style="font-size: 14px;">Cards Reviewed</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Options -->
+        <div class="card mb-3">
+            <div class="flex-between" style="align-items: center;">
+                <div class="flex gap-2">
+                    <button class="btn btn-primary" onclick="filterCards('all')" id="filterAll">All Cards</button>
+                    <button class="btn btn-secondary" onclick="filterCards('learning')"
+                        id="filterLearning">Learning</button>
+                    <button class="btn btn-secondary" onclick="filterCards('review')" id="filterReview">Review</button>
+                    <button class="btn btn-secondary" onclick="filterCards('mastered')"
+                        id="filterMastered">Mastered</button>
+                </div>
+                <button class="btn btn-primary" onclick="startPractice()"
+                    style="font-size: 18px; background: var(--gradient-primary);">
+                    🎯 Start Practice
+                </button>
+            </div>
+        </div>
+
+        <!-- Card Grid (New) -->
+        <div id="cardGrid" class="grid-4 mb-3">
+            <!-- Cards will be rendered here -->
+        </div>
+
+        <!-- Flashcard Practice View -->
+        <div id="flashcardPractice" class="hidden">
+            <!-- Progress -->
+            <div class="card mb-2" style="padding: 12px;">
+                <div class="flex-between">
+                    <span class="text-muted">Card <span id="currentCard">1</span> / <span
+                            id="totalCards">0</span></span>
+                    <button class="btn btn-secondary" onclick="exitPractice()">End Practice</button>
+                </div>
+                <div
+                    style="background: var(--bg-secondary); height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden;">
+                    <div id="progressBar"
+                        style="background: var(--purple); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+            </div>
+
+            <!-- Flashcard -->
+            <div class="card text-center" onclick="flipCard()"
+                style="min-height: 450px; cursor: pointer; padding: 48px; position: relative; perspective: 1000px;">
+                <div id="flashcard" style="transition: transform 0.6s; transform-style: preserve-3d;">
+                    <div id="cardFront" style="backface-visibility: hidden;">
+                        <p class="text-muted mb-2">Click to flip</p>
+                        <h1 style="font-size: 56px; margin: 64px 0; font-weight: 800; color: var(--text-primary);"
+                            id="frontText">Word
+                        </h1>
+                        <button class="btn btn-primary"
+                            onclick="event.stopPropagation(); playAudio(document.getElementById('frontText').textContent)">
+                            🔊 Listen
+                        </button>
+                    </div>
+                    <div id="cardBack" class="hidden"
+                        style="backface-visibility: hidden; transform: rotateY(180deg); position: absolute; top: 48px; left: 48px; right: 48px;">
+                        <p class="text-muted mb-2">Translation</p>
+                        <h1 style="font-size: 56px; margin: 64px 0; font-weight: 800; color: var(--purple);"
+                            id="backText">Translation</h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rating Buttons -->
+            <div class="flex-center gap-2 mt-2">
+                <button class="btn" style="background: var(--red); font-size: 18px; padding: 16px 32px;"
+                    onclick="rateCard('hard')">
+                    😕 Hard
+                </button>
+                <button class="btn" style="background: var(--yellow); font-size: 18px; padding: 16px 32px;"
+                    onclick="rateCard('good')">
+                    😊 Good
+                </button>
+                <button class="btn" style="background: var(--green); font-size: 18px; padding: 16px 32px;"
+                    onclick="rateCard('easy')">
+                    😄 Easy
+                </button>
+            </div>
+        </div>
+
+        <!-- Card Statistics -->
+        <div id="cardStats" class="grid-3">
+            <div class="card">
+                <h3 style="color: var(--blue);" id="totalCount">0</h3>
+                <p class="text-muted">Total Cards</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--yellow);" id="learningCount">0</h3>
+                <p class="text-muted">Learning</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--green);" id="masteredCount">0</h3>
+                <p class="text-muted">Mastered</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="js/marquee.js"></script>
+    <script src="js/flashcards.js"></script>
+</body>
+
+</html>

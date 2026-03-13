@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Difficult Words - LangZy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="flex-between mb-2" style="align-items: center; padding: 20px 0;">
+            <div class="flex gap-2" style="align-items: center;">
+                <button class="btn btn-secondary" onclick="window.history.back()" title="Go Back">
+                    ← Back
+                </button>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="assets/logo.png" alt="LangZy Logo"
+                        style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--emerald-light);">
+                    <h2
+                        style="margin: 0; background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: -1px;">
+                        LangZy</h2>
+                </div>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <label class="theme-switch" title="Toggle Light/Dark Mode" style="margin-right: 12px;">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="theme-slider"></span>
+                </label>
+                <button class="btn btn-secondary" onclick="window.location.href='home.html'">
+                    🏠 Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Cycling Marquee -->
+    <div id="langMarqueeMount"></div>
+
+    <div class="container" style="padding-top: 20px;">
+        <!-- Header -->
+        <div class="flex-between mb-3">
+            <div>
+                <h1 style="font-size: 36px; margin-bottom: 8px;">📖 Difficult Words</h1>
+                <p class="text-muted" id="languageName">Words you're working on</p>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <select id="languageSelector" onchange="changeLanguage(this.value)">
+                    <!-- Languages populated by JS -->
+                </select>
+                <div class="card" style="padding: 16px 24px;">
+                    <h3 style="color: var(--yellow); margin-bottom: 4px;" id="wordCount">0</h3>
+                    <p class="text-muted" style="font-size: 14px;">Difficult Words</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Word -->
+        <div class="card mb-3">
+            <h3 class="mb-2">➕ Add Difficult Word</h3>
+            <div class="grid-2 mb-2">
+                <input type="text" id="newWord" placeholder="Word in target language">
+                <input type="text" id="newTranslation" placeholder="Translation">
+            </div>
+            <textarea id="newContext" rows="2" placeholder="Context or sentence (optional)" class="mb-2"></textarea>
+            <button class="btn btn-primary" onclick="addWord()">Add Word</button>
+        </div>
+
+        <!-- Filter Options -->
+        <div class="card mb-3">
+            <div class="flex-between">
+                <div class="flex gap-2">
+                    <button class="btn btn-primary" onclick="filterWords('all')" id="filterAll">All</button>
+                    <button class="btn btn-secondary" onclick="filterWords('learning')"
+                        id="filterLearning">Learning</button>
+                    <button class="btn btn-secondary" onclick="filterWords('mastered')"
+                        id="filterMastered">Mastered</button>
+                </div>
+                <input type="text" id="searchInput" placeholder="🔍 Search words..." oninput="searchWords()"
+                    style="width: 300px;">
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="grid-3 mb-3">
+            <div class="card">
+                <h3 style="color: var(--blue);" id="totalWords">0</h3>
+                <p class="text-muted">Total Words</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--yellow);" id="learningWords">0</h3>
+                <p class="text-muted">Learning</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--green);" id="masteredWords">0</h3>
+                <p class="text-muted">Mastered</p>
+            </div>
+        </div>
+
+        <!-- Words List -->
+        <div id="wordsList">
+            <!-- Words will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="card text-center hidden" style="padding: 64px;">
+            <div style="font-size: 80px; margin-bottom: 16px;">📚</div>
+            <h2 style="margin-bottom: 16px;">No Difficult Words Yet</h2>
+            <p class="text-muted" style="font-size: 18px;">
+                Add words you find challenging to practice them later
+            </p>
+        </div>
+    </div>
+
+    <!-- Word Detail Modal -->
+    <div id="wordModal" class="hidden"
+        style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div class="card" style="max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto;">
+            <div class="flex-between mb-2">
+                <h2 id="modalWord">Word</h2>
+                <button class="btn btn-secondary" onclick="closeModal()">✕</button>
+            </div>
+            <div class="card mb-2" style="background: var(--bg-secondary); padding: 24px;">
+                <h3 id="modalTranslation" style="color: var(--blue);">Translation</h3>
+                <button class="btn btn-primary mt-1" onclick="playWordAudio()">🔊 Listen</button>
+            </div>
+            <div id="modalContext" class="mb-2">
+                <p class="text-muted">Context</p>
+                <p id="contextText"></p>
+            </div>
+            <div id="modalNotes" class="mb-2">
+                <p class="text-muted">Notes</p>
+                <textarea id="notesInput" rows="3" placeholder="Add personal notes..."></textarea>
+                <button class="btn btn-secondary mt-1" onclick="saveNotes()">Save Notes</button>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-success" onclick="markAsMastered()">✅ Mark as Mastered</button>
+                <button class="btn btn-danger" onclick="removeWord()">🗑️ Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="js/marquee.js"></script>
+    <script src="js/difficult-words.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+<!-- Langzy Logo SVG -->
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Circle with Gradient -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7b2ff7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#b24bf3;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#1a1a2e" stroke="url(#logoGradient)" stroke-width="3"/>
+  
+  <!-- Brain Icon -->
+  <circle cx="100" cy="90" r="35" fill="url(#brainGradient)" opacity="0.3"/>
+  <text x="100" y="105" font-family="Arial" font-size="40" fill="url(#logoGradient)" text-anchor="middle">🧠</text>
+  
+  <!-- Language Characters Around -->
+  <text x="60" y="50" font-family="Arial" font-size="16" fill="#00d4ff" opacity="0.7">中</text>
+  <text x="140" y="50" font-family="Arial" font-size="16" fill="#7b2ff7" opacity="0.7">あ</text>
+  <text x="40" y="100" font-family="Arial" font-size="16" fill="#00d4ff" opacity="0.7">한</text>
+  <text x="160" y="100" font-family="Arial" font-size="16" fill="#b24bf3" opacity="0.7">ह</text>
+  <text x="60" y="150" font-family="Arial" font-size="16" fill="#7b2ff7" opacity="0.7">ع</text>
+  <text x="140" y="150" font-family="Arial" font-size="16" fill="#00d4ff" opacity="0.7">F</text>
+  
+  <!-- App Name -->
+  <text x="100" y="175" font-family="Arial Black" font-size="24" fill="white" text-anchor="middle" font-weight="bold">Langzy</text>
+</svg>

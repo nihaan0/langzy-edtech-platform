@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Language - LangZy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Top Nav -->
+        <div class="flex-between mb-2 fadeInUp" style="align-items: center; padding-top: 10px;">
+            <div class="flex gap-2" style="align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="assets/logo.png" alt="LangZy Logo"
+                        style="width: 42px; height: 42px; object-fit: contain; border-radius: 50%; border: 2px solid rgba(52, 211, 153, 0.2);">
+                    <h2
+                        style="margin: 0; background: linear-gradient(135deg, #34D399, #10B981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">
+                        LangZy</h2>
+                </div>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <span class="header-profile-name"
+                    style="background: linear-gradient(135deg, #34D399, #8B5CF6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 17px; margin-right: 8px; display: none; letter-spacing: 0.3px;">User</span>
+                <label class="theme-switch" title="Toggle Light/Dark Mode" style="margin-right: 12px;">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="theme-slider"></span>
+                </label>
+                <button class="btn btn-danger" onclick="clearAuth(); window.location.href='index.html'">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Header with User Stats -->
+        <div class="flex-between mb-3 fadeInUp" style="align-items: flex-end;">
+            <div>
+                <h1 style="font-size: 36px; margin-bottom: 8px;">🌍 Choose Your Language</h1>
+                <p class="text-muted">Select a language to start learning</p>
+            </div>
+            <div class="flex gap-2" style="align-items: center;">
+                <div class="streak-flame">
+                    🔥 <span id="userStreak">0</span> day streak
+                </div>
+                <div class="card" style="padding: 12px 20px;">
+                    ⭐ <span id="userXP">0</span> XP
+                </div>
+                <div class="card" style="padding: 12px 20px;">
+                    <div class="hearts">
+                        <span id="heartsDisplay">❤️❤️❤️❤️❤️</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Cycling Marquee -->
+    <div id="langMarqueeMount"></div>
+
+    <div class="container">
+        <!-- Quick Actions & Modules -->
+        <h2 class="mb-2">🚀 Quick Actions</h2>
+        <div class="grid-4 mb-3">
+            <div class="card" onclick="window.location.href='dashboard.html'"
+                style="cursor: pointer; border-left: 4px solid var(--purple);">
+                <h3>💬 Continue Chat</h3>
+                <p class="text-muted">Practice with AI tutor</p>
+            </div>
+            <div class="card" onclick="window.location.href='languages.html'"
+                style="cursor: pointer; border-left: 4px solid var(--blue);">
+                <h3>🌍 Select Language</h3>
+                <p class="text-muted">Switch your target language</p>
+            </div>
+            <div class="card" onclick="window.location.href='courses.html'"
+                style="cursor: pointer; border-left: 4px solid var(--green);">
+                <h3>📚 Courses</h3>
+                <p class="text-muted">Structured lessons</p>
+            </div>
+            <div class="card" onclick="window.location.href='vocabulary.html'"
+                style="cursor: pointer; border-left: 4px solid var(--yellow);">
+                <h3>📖 Vocabulary</h3>
+                <p class="text-muted">Browse word list</p>
+            </div>
+        </div>
+
+
+        <!-- Learning Modules -->
+        <h2 class="mt-3 mb-2">🎯 Learning Modules</h2>
+        <div class="grid-4 mb-3">
+            <div class="card" onclick="window.location.href='quizzes.html'" style="cursor: pointer;">
+                <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">📝</div>
+                <h3>Quizzes</h3>
+                <p class="text-muted">Test your knowledge</p>
+            </div>
+            <div class="card" onclick="window.location.href='games.html'" style="cursor: pointer;">
+                <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">🎮</div>
+                <h3>Games</h3>
+                <p class="text-muted">Learn through fun</p>
+            </div>
+            <div class="card" onclick="window.location.href='flashcards.html'" style="cursor: pointer;">
+                <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">🃏</div>
+                <h3>Flashcards</h3>
+                <p class="text-muted">Practice with cards</p>
+            </div>
+            <div class="card" onclick="window.location.href='difficult-words.html'" style="cursor: pointer;">
+                <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">📖</div>
+                <h3>Difficult Words</h3>
+                <p class="text-muted">Focus on challenges</p>
+            </div>
+        </div>
+
+        <!-- Social -->
+        <h2 class="mb-2">👥 Social</h2>
+        <div class="grid-3">
+            <div class="card" onclick="viewLeaderboard()" style="cursor: pointer;">
+                <h3>🏆 Leaderboard</h3>
+                <p class="text-muted">See global rankings</p>
+            </div>
+            <div class="card" onclick="viewProfile()" style="cursor: pointer;">
+                <h3>👤 Profile</h3>
+                <p class="text-muted">View your progress</p>
+            </div>
+            <div class="card" onclick="window.location.href='achievements.html'" style="cursor: pointer;">
+                <h3>🏅 Achievements</h3>
+                <p class="text-muted">Your milestones</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="js/marquee.js"></script>
+    <script>
+        requireAuth();
+
+        async function loadUserStats() {
+            try {
+                const data = await apiCall('/auth/me');
+                const user = data.user;
+                saveUser(user);
+
+                document.getElementById('userStreak').textContent = user.streak || 0;
+                document.getElementById('userXP').textContent = formatNumber(user.xp || 0);
+
+                const hearts = '❤️'.repeat(user.hearts || 5) + '🖤'.repeat(5 - (user.hearts || 5));
+                document.getElementById('heartsDisplay').innerHTML = hearts;
+            } catch (error) {
+                console.error('Failed to load user stats:', error);
+            }
+        }
+
+        function viewLeaderboard() {
+            window.location.href = 'leaderboard.html';
+        }
+
+        function viewProfile() {
+            window.location.href = 'profile.html';
+        }
+
+        loadUserStats();
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat - LangZy</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 39, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 20px;
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .modal-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .modal-text {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalPop {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .btn-modal-delete {
+            background: linear-gradient(135deg, #EF4444, #B91C1C);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-modal-cancel {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-modal-delete:hover,
+        .btn-modal-cancel:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Header -->
+    <header class="glass-card mb-3" style="margin: 20px auto; max-width: 1360px; border-radius: 12px; padding: 12px 24px;">
+        <div class="flex-between">
+            <div class="flex gap-2" style="align-items: center;">
+                <button class="btn btn-secondary" onclick="window.history.back()" title="Go Back" style="padding: 10px 18px; font-size: 14px;">
+                    ← Back
+                </button>
+                <div style="display: flex; align-items: center; gap: 12px; margin-left: 8px;">
+                    <img src="assets/logo.png" alt="LangZy Logo"
+                        style="width: 38px; height: 38px; object-fit: contain; border-radius: 50%; border: 2px solid var(--emerald-light);">
+                    <h2 style="margin: 0; background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">
+                        LangZy</h2>
+                </div>
+            </div>
+            <div class="flex gap-3" style="align-items: center;">
+                <span class="header-profile-name" style="color: var(--text-main); font-weight: 700; font-size: 15px;">User</span>
+                <label class="theme-switch" title="Toggle Light/Dark Mode">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="theme-slider"></span>
+                </label>
+                <button class="btn btn-secondary" onclick="window.location.href='home.html'" style="padding: 10px 18px; font-size: 14px;">
+                    🏠 Home
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Language Cycling Marquee -->
+    <div id="langMarqueeMount" style="margin-bottom: 24px;"></div>
+
+    <main class="container fadeInUp" style="max-width: 1400px; padding: 0 20px;">
+        
+        <!-- Row 1: Session Controls -->
+        <div class="glass-card mb-3" style="padding: 16px 24px; border-radius: 16px;">
+            <div class="flex-between flex-wrap gap-4">
+                <div class="flex gap-4" style="align-items: center;">
+                    <div id="currentLanguage" style="display: flex; align-items: center; gap: 12px;">
+                        <span id="currentLanguageFlag" style="font-size: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🌍</span>
+                        <span id="currentLanguageName" style="font-weight: 800; font-size: 22px; color: var(--text-primary);">Select Language</span>
+                    </div>
+                    <div style="height: 30px; width: 2px; background: var(--border-color); margin: 0 4px;"></div>
+                    <select id="difficultySelect" onchange="changeDifficulty()"
+                        style="width: auto; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.5); font-weight: 600;">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3" style="align-items: center;">
+                    <select id="scenarioSelect" onchange="changeScenario()"
+                        style="width: auto; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.5); font-weight: 600;">
+                        <option value="general">General Chat</option>
+                        <option value="restaurant">🍽️ Restaurant</option>
+                        <option value="travel">✈️ Travel</option>
+                        <option value="shopping">🛍️ Shopping</option>
+                        <option value="business">💼 Business</option>
+                        <option value="dating">Casual Chat</option>
+                    </select>
+                    <button class="btn btn-danger" onclick="clearChat()"
+                        style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: var(--gradient-danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
+                        🗑️ Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2" style="grid-template-columns: 1.7fr 1fr; gap: 24px; align-items: start;">
+
+            <!-- Column 1: Chat Area -->
+            <div class="glass-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; min-height: 800px;">
+                <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.3);">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 10px; color: var(--text-primary); font-size: 18px; font-weight: 700;">
+                        <span style="font-size: 20px; opacity: 0.8;">💬</span> AI Conversation
+                    </h3>
+                </div>
+
+                <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 24px; background: rgba(248, 250, 252, 0.4);">
+                    <div class="text-center text-muted" style="padding: 120px 20px;">
+                        <div style="font-size: 64px; margin-bottom: 24px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));">🎯</div>
+                        <h2 style="font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px;">Start practicing!</h2>
+                        <p style="font-size: 16px; max-width: 400px; margin: 12px auto 0; line-height: 1.6;">Select a language and scenario to begin chatting with your AI tutor.</p>
+                    </div>
+                </div>
+
+                <div style="padding: 24px; background: rgba(255,255,255,0.5); border-top: 1px solid var(--border-color);">
+                    <div class="flex gap-3" style="align-items: center;">
+                        <button id="voiceBtn" class="btn" onclick="startVoiceInput()"
+                            style="width: 56px; height: 52px; border-radius: 12px; background: var(--gradient-success); color: white; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: 0.3s;">
+                            🎤
+                        </button>
+                        <input type="text" id="messageInput" placeholder="Type your message..."
+                            style="flex: 1; padding: 14px 20px; border-radius: 12px; border: 2px solid var(--purple); background: white; color: var(--text-primary); font-size: 16px; font-weight: 500;"
+                            onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button class="btn" onclick="sendMessage()"
+                            style="padding: 14px 36px; border-radius: 12px; background: var(--gradient-primary); color: white; font-weight: 700; font-size: 16px; transition: 0.3s;">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2: Sidebar Area -->
+            <div class="flex" style="flex-direction: column; gap: 24px;">
+
+                <!-- Profile & Stats Card -->
+                <div class="glass-card" style="padding: 24px;">
+                    <div class="flex gap-4" style="align-items: center; margin-bottom: 24px;">
+                        <div style="position: relative;">
+                            <img id="userAvatar" src="" alt="Avatar"
+                                style="width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--purple); background: white;">
+                            <div style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: var(--green); border-radius: 50%; border: 3px solid white;"></div>
+                        </div>
+                        <div>
+                            <h2 id="userName" style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text-primary);">User</h2>
+                            <div id="leagueBadge" class="league-badge"
+                                style="display: inline-block; margin-top: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+                                🏆 Bronze
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="user-stats" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                        <div class="stat-item flex-center"
+                            style="flex-direction: column; padding: 16px 8px; border-radius: 16px; background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); transition: 0.3s;">
+                            <span class="stat-value" id="userStreak" style="font-size: 22px; font-weight: 800; color: var(--red);">0</span>
+                            <span class="stat-label" style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Streak</span>
+                        </div>
+                        <div class="stat-item flex-center"
+                            style="flex-direction: column; padding: 16px 8px; border-radius: 16px; background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); transition: 0.3s;">
+                            <span class="stat-value" id="userTotalXP" style="font-size: 22px; font-weight: 800; color: var(--purple);">0</span>
+                            <span class="stat-label" style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Total XP</span>
+                        </div>
+                        <div class="stat-item flex-center"
+                            style="flex-direction: column; padding: 16px 8px; border-radius: 16px; background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); transition: 0.3s;">
+                            <span class="stat-value" id="userLevel" style="font-size: 22px; font-weight: 800; color: var(--blue);">1</span>
+                            <span class="stat-label" style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Level</span>
+                        </div>
+                    </div>
+                    <div class="hearts" id="heartsDisplay" style="margin-top: 20px; justify-content: center; gap: 8px;"></div>
+                </div>
+
+                <!-- Daily Challenge -->
+                <div class="glass-card" style="padding: 24px; border-left: 5px solid var(--orange);">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 800; color: var(--text-primary);">
+                        <span style="font-size: 22px;">🎯</span> Daily Challenge
+                    </h3>
+                    <div id="dailyChallenge">
+                        <div style="padding: 16px; background: rgba(255,255,255,0.4); border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
+                            <div class="spinner" style="width: 24px; height: 24px; border-width: 3px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Your Progress -->
+                <div class="glass-card" style="padding: 24px; border-left: 5px solid var(--purple);">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 800; color: var(--text-primary);">
+                        <span style="font-size: 22px;">📊</span> Learning Stats
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div style="text-align: center; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 16px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 36px; font-weight: 900; color: var(--purple); line-height: 1;" id="vocabularyCount">0</div>
+                            <div style="font-size: 10px; font-weight: 800; margin-top: 8px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Words Learnt</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 16px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 36px; font-weight: 900; color: var(--blue); line-height: 1;" id="accuracy">0%</div>
+                            <div style="font-size: 10px; font-weight: 800; margin-top: 8px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Accuracy</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Access Modules -->
+                <div class="glass-card" style="padding: 24px; border-left: 5px solid var(--blue);">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 800; color: var(--text-primary);">
+                        <span style="font-size: 22px;">⚡</span> Quick Modules
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="window.location.href='quizzes.html'"
+                            style="padding: 14px; border-radius: 12px; background: white; border: 1px solid var(--border-color); font-weight: 700; width: 100%; font-size: 14px;">
+                            📝 Quizzes
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.location.href='games.html'"
+                            style="padding: 14px; border-radius: 12px; background: white; border: 1px solid var(--border-color); font-weight: 700; width: 100%; font-size: 14px;">
+                            🎮 Games
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.location.href='flashcards.html'"
+                            style="padding: 14px; border-radius: 12px; background: white; border: 1px solid var(--border-color); font-weight: 700; width: 100%; font-size: 14px;">
+                            🃏 Cards
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.location.href='difficult-words.html'"
+                            style="padding: 14px; border-radius: 12px; background: white; border: 1px solid var(--border-color); font-weight: 700; width: 100%; font-size: 14px;">
+                            📖 Words
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Voice Settings -->
+                <div class="glass-card" style="padding: 24px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 800; color: var(--text-primary);">
+                        <span style="font-size: 22px;">🔊</span> Voice Settings
+                    </h3>
+                    <div class="flex-between mb-3">
+                        <span style="font-weight: 700; font-size: 14px; color: var(--text-secondary);">Auto-speak AI</span>
+                        <input type="checkbox" id="autoSpeak" checked style="width: 20px; height: 20px; accent-color: var(--purple);">
+                    </div>
+                    <div class="flex-between">
+                        <span style="font-weight: 700; font-size: 14px; color: var(--text-secondary);">Voice Feedback</span>
+                        <input type="checkbox" id="pronFeedback" style="width: 20px; height: 20px; accent-color: var(--purple);">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    </div>
+
+    <!-- Custom Delete Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-icon">🗑️</div>
+            <div class="modal-title">Delete or not?</div>
+            <p class="modal-text">This will permanently delete your entire conversation history with the AI
+                tutor.</p>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn-modal-delete" onclick="confirmClearChat()">Delete Forever</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="js/marquee.js"></script>
+    <script>
+        requireAuth();
+
+        let user = null;
+        let currentLanguage = '';
+        let currentDifficulty = 'beginner';
+        let currentScenario = 'general';
+        let conversationHistory = [];
+
+
+        // Combined loadProgress function
+        async function loadProgress() {
+            try {
+                const response = await apiCall(`/progress/${currentLanguage}`);
+                const progress = response.progress || { vocabularyMastered: 0, accuracy: 0, totalXP: 0 };
+
+                const vocabEl = document.getElementById('vocabularyCount');
+                const accuracyEl = document.getElementById('accuracy');
+                if (vocabEl) vocabEl.textContent = progress.vocabularyMastered || 0;
+                if (accuracyEl) accuracyEl.textContent = (progress.accuracy || 0) + '%';
+
+                // Update language-specific XP indicators if they exist
+                const currentXPEl = document.getElementById('currentXP');
+                const nextLevelXPEl = document.getElementById('nextLevelXP');
+                const xpFillEl = document.getElementById('xpFill');
+
+                if (currentXPEl && nextLevelXPEl && xpFillEl) {
+                    const langXPInfo = calculateLevelXP(progress.totalXP || 0);
+                    currentXPEl.textContent = langXPInfo.current;
+                    nextLevelXPEl.textContent = langXPInfo.needed;
+                    xpFillEl.style.width = langXPInfo.percent + '%';
+                }
+            } catch (error) {
+                console.error('Failed to load progress:', error);
+            }
+        }
+
+        async function loadDailyChallenge() {
+            try {
+                const data = await apiCall('/challenges/daily');
+                const challenge = data.challenge;
+
+                const challengeHTML = `
+          <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+            <div style="font-size: 24px; margin-bottom: 8px;">${challenge.icon}</div>
+            <h4 style="margin-bottom: 4px;">${challenge.title}</h4>
+            <p class="text-muted" style="font-size: 14px; margin-bottom: 8px;">${challenge.description}</p>
+            <div class="xp-bar" style="margin-bottom: 4px;">
+              <div class="xp-fill" style="width: ${(challenge.progress / challenge.targetValue) * 100}%;"></div>
+            </div>
+            <div class="text-muted" style="font-size: 12px;">${challenge.progress} / ${challenge.targetValue} - Reward: ${challenge.bonusXP} XP</div>
+          </div>
+        `;
+
+                document.getElementById('dailyChallenge').innerHTML = challengeHTML;
+            } catch (error) {
+                console.error('Failed to load daily challenge:', error);
+            }
+        }
+
+        async function loadUserData() {
+            try {
+                // Fetch fresh user data from backend
+                const response = await apiCall('/auth/me');
+                user = response.user;
+
+                // Update local storage with fresh data
+                localStorage.setItem('user', JSON.stringify(user));
+
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userAvatar').src = user.avatar;
+                document.getElementById('userStreak').textContent = user.streak || 0;
+                document.getElementById('userTotalXP').textContent = user.xp || 0;
+                document.getElementById('userLevel').textContent = user.level || 1;
+
+                // XP Progress (Language Specific)
+                // Note: We'll update this in loadProgress to show progress in current language
+
+                // Hearts
+                const hearts = '❤️'.repeat(user.hearts || 5) + '🖤'.repeat(5 - (user.hearts || 5));
+                document.getElementById('heartsDisplay').innerHTML = hearts;
+
+                // League
+                const leagueBadge = document.getElementById('leagueBadge');
+                leagueBadge.textContent = '🏆 ' + (user.leagueTier || 'Bronze');
+                leagueBadge.className = 'league-badge league-' + (user.leagueTier || 'bronze').toLowerCase();
+
+                // Current language
+                currentLanguage = user.currentLanguage || 'Spanish';
+                const langInfo = getLanguageInfo(currentLanguage);
+                document.getElementById('currentLanguageName').textContent = currentLanguage;
+                document.getElementById('currentLanguageFlag').textContent = langInfo.flag;
+
+                // Load language-specific progress
+                await loadProgress();
+            } catch (error) {
+                console.error('Failed to load user data:', error);
+                // Fallback to local storage
+                user = getUser();
+                if (user) {
+                    document.getElementById('userName').textContent = user.name;
+                }
+            }
+        }
+
+
+        async function loadChatHistory() {
+            try {
+                const data = await apiCall(`/chat/history?language=${currentLanguage}&scenario=${currentScenario}`);
+                conversationHistory = data.messages || [];
+                displayMessages();
+            } catch (error) {
+                console.error('Failed to load chat history:', error);
+            }
+        }
+
+        function displayMessages() {
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = '';
+
+            if (conversationHistory.length === 0) {
+                container.innerHTML = `
+                        <div class="text-center text-muted" style="padding: 100px 20px;">
+                            <div style="font-size: 64px; margin-bottom: 24px;">🎯</div>
+                            <h2 style="font-weight: 700; color: var(--text-primary);">Start practicing!</h2>
+                            <p style="font-size: 16px; max-width: 400px; margin: 0 auto;">Select a language and scenario to begin chatting with your AI tutor.</p>
+                        </div>
+                    `;
+                return;
+            }
+
+            conversationHistory.forEach((msg, index) => {
+                if (msg.role === 'system') return;
+                const isAI = msg.role === 'assistant';
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `flex gap-3 mb-6 ${isAI ? '' : 'flex-row-reverse'}`;
+
+                // Avatar
+                let avatarSrc = isAI ? 'img/ai-avatar.png' : (user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=user');
+                const avatarHTML = `<img src="${avatarSrc}" style="width: 44px; height: 44px; border-radius: 50%; background: #fff; flex-shrink: 0; border: 2px solid ${isAI ? '#10b981' : '#3b82f6'};" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.role}'">`;
+
+                let mainText = msg.content;
+                let translit = '';
+                let translation = '';
+                let userMsgTranslation = '';
+
+                if (isAI) {
+                    let content = msg.content;
+
+                    if (content.includes('|') || content.includes('Translation:') || content.includes('Reply:')) {
+                        const lines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+                        // Handle multi-line Translation/Reply format
+                        let replyLine = lines.find(l => l.includes('Reply:') || l.includes('💬'));
+                        let transLine = lines.find(l => l.includes('Translation:') || l.includes('📝'));
+
+                        if (transLine) {
+                            transLine = transLine.replace(/^(📝\s*Translation:|Translation:)\s*/i, '').trim();
+                            const tParts = transLine.split('|').map(p => p.trim());
+                            userMsgTranslation = tParts[0];
+                            if (!replyLine && !translation) {
+                                // Fallback if AI only gave translation of user's msg
+                                mainText = tParts[0];
+                                translit = tParts[1] || '';
+                                translation = tParts[2] || '';
+                            }
+                        }
+
+                        // ReplyLine takes priority for the main chat bubble
+                        if (replyLine) {
+                            replyLine = replyLine.replace(/^(💬\s*Reply:|Reply:)\s*/i, '').trim();
+                            const rParts = replyLine.split('|').map(p => p.trim());
+                            mainText = rParts[0];
+                            translit = rParts[1] || '';
+                            translation = rParts[2] || '';
+                        }
+                        // Fallback: simple pipe response with no labels
+                        else if (!replyLine && !transLine && lines[0].includes('|')) {
+                            const parts = lines[0].split('|').map(p => p.trim());
+                            mainText = parts[0];
+                            translit = parts[1] || '';
+                            translation = parts[2] || '';
+                        }
+                    } else if (msg.metadata) {
+                        translation = msg.metadata.translation || '';
+                        translit = msg.metadata.transliteration || '';
+                    }
+
+                    // Clean up main text
+                    mainText = mainText.replace(/^(Translation:|Reply:|📝|💬)\s*/i, '').trim();
+
+                    // Extract transliteration if it's trapped in parens
+                    if (!translit && mainText.match(/\(([^)]+)\)/)) {
+                        translit = mainText.match(/\(([^)]+)\)/)[1];
+                    }
+
+                    // Remove parens for display
+                    const cleaned = mainText.replace(/\s*\([^)]+\)/g, '').trim();
+                    if (cleaned) {
+                        mainText = cleaned;
+                    } else if (!translit) {
+                        // If it strips down to nothing, just show it without parens
+                        mainText = mainText.replace(/[()]/g, '');
+                    }
+
+                    // Combine user's translated message with the AI's translation
+                    if (userMsgTranslation && userMsgTranslation !== mainText) {
+                        translation = `<span style="display:block;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid #e2e8f0;font-size:13px;"><strong style="color:var(--purple)">You said:</strong> ${userMsgTranslation}</span>${translation}`;
+                    }
+                }
+
+                // Content Card
+                let contentHTML = `
+                        <div class="card" style="padding: 16px 20px; border-radius: 16px; max-width: 85%; position: relative; ${isAI ? 'background: #ffffff; border-left: 5px solid #10b981;' : 'background: #eff6ff; border: 1px solid #bfdbfe;'}">
+                            <div class="msg-main-content" style="font-size: 18px; line-height: 1.6; color: var(--text-primary); font-weight: 600;">
+                                ${mainText}
+                            </div>
+                    `;
+
+                if (isAI) {
+                    // AI Response specific additions
+                    contentHTML += `
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9; display: flex; gap: 20px; align-items: center;">
+                                <button class="btn-icon" title="View Translation (English)" style="background: none; border: none; cursor: pointer; font-size: 20px; padding: 4px; filter: grayscale(0.5); transition: 0.2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(0.5)'" onclick="toggleMsgDetail(this, 'translation', ${index})">📝</button>
+                                <button class="btn-icon" title="View Pronunciation" style="background: none; border: none; cursor: pointer; font-size: 20px; padding: 4px; filter: grayscale(0.5); transition: 0.2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(0.5)'" onclick="toggleMsgDetail(this, 'transliteration', ${index})">🗣️</button>
+                                <button class="btn-icon" title="Listen" style="background: none; border: none; cursor: pointer; font-size: 20px; padding: 4px; filter: grayscale(0.5); transition: 0.2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(0.5)'" onclick="speak('${mainText.replace(/'/g, "\\'")}', getLanguageCode(currentLanguage))">🔊</button>
+                                <div style="margin-left: auto; font-size: 11px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">AI Tutor</div>
+                            </div>
+                            <div class="msg-details" style="display: none; margin-top: 15px; padding: 16px; background: #f8fafc; border-radius: 12px; font-size: 15px; border: 1px solid #e2e8f0; color: #334155; animation: fadeIn 0.3s ease;">
+                            </div>
+                        `;
+                } else {
+                    contentHTML += `
+                            <div style="margin-top: 8px; text-align: right; font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">YOU</div>
+                        `;
+                }
+
+                contentHTML += `</div>`;
+                msgDiv.innerHTML = avatarHTML + contentHTML;
+                container.appendChild(msgDiv);
+
+                // Store hidden text in the msg-details for the toggle function
+                if (isAI) {
+                    const detailDiv = msgDiv.querySelector('.msg-details');
+                    detailDiv.dataset.translation = translation || 'English translation not available.';
+                    detailDiv.dataset.translit = translit || 'Pronunciation guide not available.';
+
+                    // Optional: Auto-expand for the very latest AI message
+                    if (index === conversationHistory.length - 1 && (translation || translit)) {
+                        setTimeout(() => {
+                            const btn = msgDiv.querySelector('.btn-icon'); // First button (translation)
+                            toggleMsgDetail(btn, translation ? 'translation' : 'transliteration', index);
+                        }, 500);
+                    }
+                }
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toggleMsgDetail(btn, type, index) {
+            const detailDiv = btn.closest('.card').querySelector('.msg-details');
+            const isShowing = detailDiv.style.display === 'block';
+            const currentType = detailDiv.dataset.activeType;
+
+            // Reset animation
+            detailDiv.style.animation = 'none';
+            detailDiv.offsetHeight; /* trigger reflow */
+            detailDiv.style.animation = null;
+
+            if (isShowing && currentType === type) {
+                detailDiv.style.display = 'none';
+                detailDiv.dataset.activeType = '';
+            } else {
+                const text = type === 'translation' ?
+                    `<div style="font-weight: 800; margin-bottom: 5px; color: var(--purple); font-size: 12px; text-transform: uppercase;">Meaning (English)</div><div style="font-size: 16px;">${detailDiv.dataset.translation}</div>` :
+                    `<div style="font-weight: 800; margin-bottom: 5px; color: #3b82f6; font-size: 12px; text-transform: uppercase;">Pronunciation</div><div style="font-size: 16px; font-style: italic;">${detailDiv.dataset.translit}</div>`;
+
+                detailDiv.innerHTML = text;
+                detailDiv.style.display = 'block';
+                detailDiv.dataset.activeType = type;
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            input.value = '';
+
+            // Add user message
+            conversationHistory.push({ role: 'user', content: message });
+            displayMessages();
+
+            try {
+                const data = await apiCall('/chat/message', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        message,
+                        language: currentLanguage,
+                        difficulty: currentDifficulty,
+                        scenario: currentScenario
+                    })
+                });
+
+                // Add AI response
+                conversationHistory.push({ role: 'assistant', content: data.message });
+                displayMessages();
+
+                // Auto-speak if enabled
+                if (document.getElementById('autoSpeak').checked) {
+                    speak(data.message, getLanguageCode(currentLanguage));
+                }
+
+                showToast('Message sent! 💬', 'success');
+            } catch (error) {
+                showToast('Failed to send message: ' + error.message, 'error');
+                conversationHistory.pop(); // Remove user message on error
+                displayMessages();
+            }
+        }
+
+        function startVoiceInput() {
+            const btn = document.getElementById('voiceBtn');
+            btn.textContent = '🔊 listening...';
+            btn.style.background = 'var(--red)';
+            btn.disabled = true;
+
+            startSpeechRecognition((transcript) => {
+                const input = document.getElementById('messageInput');
+                // Append transcript to existing text if any
+                input.value = input.value ? input.value + ' ' + transcript : transcript;
+                btn.textContent = '🎤';
+                btn.style.background = 'var(--green)';
+                btn.disabled = false;
+                showToast('Voice captured! ✅', 'success');
+            }, getLanguageCode(currentLanguage));
+
+            // Failsafe reset if no result received
+            setTimeout(() => {
+                if (btn.disabled) {
+                    btn.textContent = '🎤';
+                    btn.style.background = 'var(--green)';
+                    btn.disabled = false;
+                }
+            }, 8000);
+        }
+
+        function changeDifficulty() {
+            currentDifficulty = document.getElementById('difficultySelect').value;
+            showToast(`Difficulty set to ${currentDifficulty}`, 'info');
+        }
+
+        async function changeScenario() {
+            currentScenario = document.getElementById('scenarioSelect').value;
+            showToast(`Scenario changed to ${currentScenario}`, 'info');
+            await loadChatHistory();
+        }
+
+        function clearChat() {
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        async function confirmClearChat() {
+            closeDeleteModal();
+            try {
+                await apiCall(`/chat/clear?language=${currentLanguage}&scenario=${currentScenario}`, {
+                    method: 'DELETE'
+                });
+                conversationHistory = [];
+                displayMessages();
+                showToast('Chat deleted forever! 🗑️', 'success');
+            } catch (error) {
+                showToast('Failed to delete chat', 'error');
+            }
+        }
+
+        // Initialize
+        async function initialize() {
+            await loadUserData();
+
+            // Handle scenario from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const scenarioParam = urlParams.get('scenario');
+
+            if (scenarioParam) {
+                const scenarioSelect = document.getElementById('scenarioSelect');
+                // Check if the scenario exists in the options
+                const exists = Array.from(scenarioSelect.options).some(opt => opt.value === scenarioParam);
+                if (exists) {
+                    currentScenario = scenarioParam;
+                    scenarioSelect.value = scenarioParam;
+                    showToast(`Starting ${scenarioParam} scenario! 🎭`, 'info');
+                }
+            }
+
+            // Sync voice settings
+            const autoVoice = localStorage.getItem('autoVoice') !== 'false';
+            const autoSpeakBtn = document.getElementById('autoSpeak');
+            autoSpeakBtn.checked = autoVoice;
+            autoSpeakBtn.addEventListener('change', () => {
+                localStorage.setItem('autoVoice', autoSpeakBtn.checked);
+            });
+
+            // Initial chat load
+            await loadDailyChallenge();
+            await loadChatHistory();
+        }
+
+        initialize();
+    </script>
+</body>
+
+</html>
